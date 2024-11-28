@@ -58,3 +58,13 @@ class ConversationRepository:
             """
             result = session.run(query, device_id=device_id)
             return result.single()
+
+    def check_two_device_connection(self, devices):
+        with self._driver.session() as session:
+            query = """
+                match (device1:Device{device_id: $device1}) -[rel:CONNECTED]- 
+                (device2:Device{device_id: $device2})
+                return device1, device2
+            """
+            result = session.run(query, devices)
+            return list(result)

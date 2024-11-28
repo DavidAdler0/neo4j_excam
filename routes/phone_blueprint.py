@@ -44,9 +44,24 @@ def get_strong_signal_devices():
 def get_connection_count(device_id):
    try:
       repo = ConversationRepository(current_app.neo4j_driver)
-      res = repo.find_strong_signal()
+      res = repo.count_connections_of_device(device_id)
+      print(dict(res))
+
+      return jsonify({"count": dict(res)["count(node1)"]}), 200
+   except Exception as e:
+      print(e)
+      return jsonify({'error': str(e)}), 500
+@phone_blueprint.route("/check_connection", methods=['GET'])
+def check_connection():
+   try:
+      devices = request.args.to_dict()
+      print(devices)
+      repo = ConversationRepository(current_app.neo4j_driver)
+      res = repo.check_two_device_connection(devices)
       print(res)
-      return jsonify(dict(res)), 200
+      if res:
+         return jsonify({"status": "connection exists"}), 200
+      return jsonify({"status": "connection does not exist"}), 200
    except Exception as e:
       print(e)
       return jsonify({'error': str(e)}), 500
